@@ -131,6 +131,21 @@ namespace osgEarth
     //--------------------------------------------------------------------
 
     /**
+     * Callback for notification of a new image tile.
+     */
+    struct ImageLayerImageCreationCallback : public osg::Referenced
+    {
+        virtual void imageCreated(ImageLayer* imageLayer, const TileKey& key, GeoImage& img) { }
+        virtual ~ImageLayerImageCreationCallback() { }
+    };
+
+    typedef void (ImageLayerImageCreationCallback::*ImageLayerImageCreationCallbackMethodPtr)(ImageLayer* layer);
+
+    typedef std::list< osg::ref_ptr<ImageLayerImageCreationCallback> > ImageLayerImageCreationCallbackList;
+
+    //--------------------------------------------------------------------
+
+    /**
      * Internal utility class for post-processing image tiles that come from 
      * a TileSource
      */
@@ -191,6 +206,13 @@ namespace osgEarth
 
         /** Removes a property notification callback from this layer */
         void removeCallback( ImageLayerCallback* cb );
+
+        /** Adds a tile creation callback to this layer */
+        void addCallback( ImageLayerImageCreationCallback* cb );
+
+        /** Removes a tile creation callback from this layer */
+        void removeCallback( ImageLayerImageCreationCallback* cb );
+
 
         /** Override: see TerrainLayer */
         virtual void setTargetProfileHint( const Profile* profile );
@@ -272,6 +294,9 @@ namespace osgEarth
         osg::ref_ptr<TileSource::ImageOperation> _preCacheOp;
         osg::ref_ptr<osg::Image>                 _emptyImage;
         ImageLayerCallbackList                   _callbacks;
+
+        ImageLayerImageCreationCallbackList      _imageCreationCallbacks;
+
 
         virtual void fireCallback( TerrainLayerCallbackMethodPtr method );
         virtual void fireCallback( ImageLayerCallbackMethodPtr method );

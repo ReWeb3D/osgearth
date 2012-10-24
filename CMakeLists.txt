@@ -47,6 +47,8 @@ SET(OpenThreads_SOURCE_DIR ${OSGEARTH_SOURCE_DIR})
 # Maybe this can be used override existing behavior if needed?
 SET(CMAKE_MODULE_PATH "${OSGEARTH_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
+OPTION(OSGEARTH_BUILD_EXAMPLES "Enable building of osgEarth applications" ON)
+
 # IPHONE_PORT@tom
 # Trying to get CMake to generate an XCode IPhone project, current efforts are to get iphoneos sdk 3.1 working
 # Added option which needs manually setting to select the IPhone SDK for building. We can only have one of the below 

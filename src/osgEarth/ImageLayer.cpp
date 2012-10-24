@@ -262,6 +262,20 @@ ImageLayer::removeCallback( ImageLayerCallback* cb )
 }
 
 void
+ImageLayer::addCallback( ImageLayerImageCreationCallback* cb )
+{
+    _imageCreationCallbacks.push_back( cb );
+}
+
+void
+ImageLayer::removeCallback( ImageLayerImageCreationCallback* cb )
+{
+    ImageLayerImageCreationCallbackList::iterator i = std::find( _imageCreationCallbacks.begin(), _imageCreationCallbacks.end(), cb );
+    if ( i != _imageCreationCallbacks.end() ) 
+        _imageCreationCallbacks.erase( i );
+}
+
+void
 ImageLayer::fireCallback( TerrainLayerCallbackMethodPtr method )
 {
     for( ImageLayerCallbackList::const_iterator i = _callbacks.begin(); i != _callbacks.end(); ++i )
@@ -382,7 +396,15 @@ GeoImage
 ImageLayer::createImage( const TileKey& key, ProgressCallback* progress, bool forceFallback )
 {
     bool isFallback;
-    return createImageInKeyProfile( key, progress, forceFallback, isFallback);
+    GeoImage img = createImageInKeyProfile( key, progress, forceFallback, isFallback);
+
+    // TG: call a callback, if present
+    for( ImageLayerImageCreationCallbackList::const_iterator i = _imageCreationCallbacks.begin(); i != _imageCreationCallbacks.end(); ++i )
+    {
+        ImageLayerImageCreationCallback* cb = i->get();
+        cb->imageCreated(this, key, img);
+    }
+    return img;
 }
 
 

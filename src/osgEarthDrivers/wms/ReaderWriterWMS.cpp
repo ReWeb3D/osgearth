@@ -352,8 +352,13 @@ public:
         else
         {
             std::string extras;
+
+            // TG: TODO: add extras
+            //COLORSCALERANGE=-1.7%2C1.7&NUMCOLORBANDS=200 (color scale range is important
+            extras += std::string("COLORSCALERANGE=-1.7%2C1.7");
+
             if ( _timesVec.size() == 1 )
-                extras = std::string("TIME=") + _timesVec[0];
+                extras += std::string("TIME=") + _timesVec[0];
 
             ReadResult response;
             osgDB::ReaderWriter* reader = fetchTileAndReader( key, extras, progress, response );
