@@ -45,7 +45,34 @@ namespace
 {
     // ControlNodeBin shaders.
 
+    // TG: changes to enable gles2 support. Better: use shaderfactory
+    // to create this
+
     const char* s_controlVertexShader =
+
+#ifdef OSG_GLES2_AVAILABLE
+        "attribute vec3 osg_Vertex;\n"
+        "attribute vec3 osg_Normal;\n"
+        "attribute vec4 osg_Color;\n"
+        "attribute vec2 osg_MultiTexCoord0;\n"
+
+        "uniform mat4 osg_ModelViewProjectionMatrix; \n"
+        "uniform mat4 osg_ProjectionMatrix; \n"
+        "uniform mat3 osg_NormalMatrix; \n"
+
+        "varying vec2 vTexCoord0; \n"
+        "varying vec4 vFrontColor; \n"
+
+        "void main() \n"
+        "{ \n"
+        "    gl_Position = osg_ModelViewProjectionMatrix * vec4(osg_Vertex,1.0); \n"
+        "    vTexCoord0 = osg_MultiTexCoord0; \n"
+        "    vFrontColor = osg_Color; \n"
+        "} \n";
+
+
+#else // OSG_GLES2_AVAILABLE
+
         "void main() \n"
         "{ \n"
         "    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; \n"
@@ -53,26 +80,55 @@ namespace
         "    gl_FrontColor = gl_Color; \n"
         "} \n";
 
+#endif // OSG_GLES2_AVAILABLE
+
     const char* s_imageControlFragmentShader =
+#ifdef OSG_GLES2_AVAILABLE
+        "#ifdef GL_ES \n"
+        "precision highp float; \n"
+        "#endif \n"
+
+        "varying vec2 vTexCoord0; \n"
+#endif // OSG_GLES2_AVAILABLE
+
         "uniform sampler2D tex0; \n"
         "uniform float visibleTime; \n"
         "uniform float osg_FrameTime; \n"
         "void main() \n"
         "{ \n"
         "    float opacity = clamp( osg_FrameTime - visibleTime, 0.0, 1.0 ); \n"
+#ifdef OSG_GLES2_AVAILABLE
+        "    vec4 texel = texture2D(tex0, vTexCoord0.st); \n"
+#else // OSG_GLES2_AVAILABLE
         "    vec4 texel = texture2D(tex0, gl_TexCoord[0].st); \n"
+#endif //OSG_GLES2_AVAILABLE
         "    gl_FragColor = vec4(texel.rgb, texel.a * opacity); \n"
         "} \n";
 
     const char* s_labelControlFragmentShader =
+#ifdef OSG_GLES2_AVAILABLE
+        "#ifdef GL_ES \n"
+        "precision highp float; \n"
+        "#endif \n"
+
+        "varying vec2 vTexCoord0; \n"
+        "varying vec4 vFrontColor; \n"
+#endif // OSG_GLES2_AVAILABLE
+
+
         "uniform sampler2D tex0; \n"
         "uniform float visibleTime; \n"
         "uniform float osg_FrameTime; \n"
         "void main() \n"
         "{ \n"
         "    float opacity = clamp( osg_FrameTime - visibleTime, 0.0, 1.0 ); \n"
-        "    vec4 texel = texture2D(tex0, gl_TexCoord[0].st); \n"       
+#ifdef OSG_GLES2_AVAILABLE
+        "    vec4 texel = texture2D(tex0, vTexCoord0.st); \n"
+        "    gl_FragColor = vec4(vFrontColor.rgb, texel.a * opacity); \n"
+#else // OSG_GLES2_AVAILABLE
+        "    vec4 texel = texture2D(tex0, gl_TexCoord[0].st); \n"
         "    gl_FragColor = vec4(gl_Color.rgb, texel.a * opacity); \n"
+#endif //OSG_GLES2_AVAILABLE
         "} \n";
 }
 
